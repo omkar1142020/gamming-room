@@ -1,21 +1,50 @@
-import React, { Component } from 'react';
+import React from 'react';
 import {Switch,Route} from 'react-router-dom';
 import './App.css';
 import HomePage from './page/homepage/homepage.component';
 import shop from './page/shop/shop.component';
 import Header from './component/header/header.component';
 import SiginSignup from './page/signin-signup/signin-signup.component';
+import { auth,createUserProfileDocument } from './firebase/firebase.utils';
 
-const SoloPage =() =>(
-  <div>
-  <h1> Solo Page</h1>
-  </div>
-  );
+class App extends React.Component{
+  constructor(){
+    super();
+    this.state={
+      currentUser: null
+    }
+  }
+  unsubscribeFromAuth = null;
 
-function App(){
+ componentDidMount(){
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+     if(userAuth){
+      const userRef = await createUserProfileDocument(userAuth);
+
+      userRef.onSnapshot(snapshot =>{
+        this.setState(
+        {
+          currentUser:{
+            id: snapshot.id,
+            ...snapshot.data()
+          }
+        })
+      });
+     }
+     else{
+      this.setState({ currentUser: userAuth})
+     }
+    });
+  }
+
+ componentWillUnmount(){
+  this.unsubscribeFromAuth();
+ }
+
+  render(){
     return(
               <div>
-              <Header />
+              <Header currentUser={this.state.currentUser} />
                <Switch>
                 <Route exact path='/' component={HomePage} />
                 <Route path='/shop' component={shop} />
@@ -24,6 +53,9 @@ function App(){
               </div>
       );
   }
+    
+  }
+
  
 
 
