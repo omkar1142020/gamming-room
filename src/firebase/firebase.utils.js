@@ -31,8 +31,9 @@ const config={
   			 catch(error){
   				console.log('error creating user',error.message);
   			}
-  		return userRef;
+  		
   	} 
+  	return userRef;
   }
 
   firebase.initializeApp(config);
